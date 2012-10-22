@@ -38,6 +38,9 @@ class TwitterClient(Cmd):
         for status in mentions:
             print STATUS_TEMPLATE % (status.created_at, status.user.screen_name, status.text)
 
+    def do_tweet(self, parameters):
+        status = parameters.decode(sys.stdin.encoding).encode(sys.stdout.encoding)
+        self.api.update_status(status)
 
 if __name__ == "__main__":
     client = TwitterClient()
