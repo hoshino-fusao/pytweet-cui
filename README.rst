@@ -1,9 +1,9 @@
 利用方法
 ========
 
-# https://dev.twitter.com/apps でCONSUMER_KEY/CONSUMER_SECRET/ACCESS_TOKEN/ACCESS_TOKEN_SECRETを取得します。
-# settings-sample.py を settings.py としてコピーします。
-# settings.py に、取得したtwitter情報を設定します。
+- https://dev.twitter.com/apps でCONSUMER_KEY/CONSUMER_SECRET/ACCESS_TOKEN/ACCESS_TOKEN_SECRETを取得します。
+- settings-sample.py を settings.py としてコピーします。
+- settings.py に、取得したtwitter情報を設定します。
 
 参考URL
 =======
