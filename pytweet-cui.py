@@ -2,6 +2,8 @@
 from sys import stdin, stdout, exit
 import random
 from cmd import Cmd
+import urllib
+import urllib2
 import tweepy
 
 from settings import *
@@ -46,9 +48,14 @@ class TwitterClient(Cmd):
                 status=status.text.encode(stdout.encoding)
             )
 
-    def do_tweet(self, parameters):
-        status = parameters.decode(stdin.encoding).encode(stdout.encoding)
+    def do_tweet(self, message):
+        status = message.decode(stdin.encoding).encode(stdout.encoding)
         self.api.update_status(status)
+        
+        if FACEBOOK_ACCESS_TOKEN:
+            data = dict(access_token=FACEBOOK_ACCESS_TOKEN, message=status)
+            urllib2.urlopen("https://graph.facebook.com/me/feed", urllib.urlencode(data))
+
 
 if __name__ == "__main__":
     client = TwitterClient()
