@@ -1,9 +1,25 @@
 利用方法
 ========
 
-- https://dev.twitter.com/apps でCONSUMER_KEY/CONSUMER_SECRET/ACCESS_TOKEN/ACCESS_TOKEN_SECRETを取得します。
+twitter の設定
+--------------
+
+- https://dev.twitter.com/apps で以下の情報を取得します。
+    * CONSUMER_KEY
+    * CONSUMER_SECRET
+    * ACCESS_TOKEN
+    * ACCESS_TOKEN_SECRET
 - settings-sample.py を settings.py としてコピーします。
 - settings.py に、取得したtwitter情報を設定します。
+
+
+Facebook の設定(オプション)
+---------------------------
+
+- https://developers.facebook.com/tools/explorer/ で ACCESS_TOKEN を取得します。
+    * Extended Permissions で publish_stream にチェックをいててください。
+- settings.py の FACEBOOK_ACCESS_TOKEN に上記で取得した内容を設定します。
+
 
 参考URL
 =======

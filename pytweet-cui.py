@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-import sys
+from sys import stdin, stdout, exit
 import random
 from cmd import Cmd
+import urllib
+import urllib2
 import tweepy
 
 from settings import *
@@ -21,7 +23,7 @@ class TwitterClient(Cmd):
     def do_EOF(self, parameters):
         print
         print random.choice(EXIT_MESSAGES)
-        sys.exit()
+        exit()
 
     def emptyline(self):
         pass
@@ -30,17 +32,30 @@ class TwitterClient(Cmd):
         timeline = self.api.home_timeline(count=count)
         timeline.reverse()
         for status in timeline:
-            print STATUS_TEMPLATE % (status.created_at, status.user.screen_name, status.text)
+            print STATUS_TEMPLATE.format(
+                date=status.created_at,
+                name=status.user.screen_name,
+                status=status.text.encode(stdout.encoding)
+            )
 
     def do_mentions(self, count=30):
         mentions = self.api.mentions(count=count)
         mentions.reverse()
         for status in mentions:
-            print STATUS_TEMPLATE % (status.created_at, status.user.screen_name, status.text)
+            print STATUS_TEMPLATE.format(
+                date=status.created_at,
+                name=status.user.screen_name,
+                status=status.text.encode(stdout.encoding)
+            )
 
-    def do_tweet(self, parameters):
-        status = parameters.decode(sys.stdin.encoding).encode(sys.stdout.encoding)
+    def do_tweet(self, message):
+        status = message.decode(stdin.encoding).encode(stdout.encoding)
         self.api.update_status(status)
+        
+        if FACEBOOK_ACCESS_TOKEN:
+            data = dict(access_token=FACEBOOK_ACCESS_TOKEN, message=status)
+            urllib2.urlopen("https://graph.facebook.com/me/feed", urllib.urlencode(data))
+
 
 if __name__ == "__main__":
     client = TwitterClient()
