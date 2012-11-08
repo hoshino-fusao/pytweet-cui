@@ -56,6 +56,23 @@ class TwitterClient(Cmd):
             data = dict(access_token=FACEBOOK_ACCESS_TOKEN, message=status)
             urllib2.urlopen("https://graph.facebook.com/me/feed", urllib.urlencode(data))
 
+    def do_search(self, query):
+        if not query:
+            print "search [query string]"
+            return
+
+        results = self.api.search(query)
+        if not results:
+            print "No tweet results for %s." % query
+            return
+
+        for result in results:
+            print STATUS_TEMPLATE.format(
+                date = result.created_at,
+                name = result.from_user,
+                status = result.text.encode(stdout.encoding)
+            )
+
 
 if __name__ == "__main__":
     client = TwitterClient()
