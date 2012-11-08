@@ -65,12 +65,12 @@ class TwitterClient(Cmd):
                 description = l.description.encode(stdout.encoding)
             )
 
-    def do_list(self, parameters):
-        if not parameters:
+    def do_list(self, slug, count=30):
+        if not slug:
             print "list [list name]"
             return
 
-        timeline = self.api.list_timeline(self.me.screen_name, parameters)
+        timeline = self.api.list_timeline(owner=self.me.screen_name, slug=slug, count=count)
         timeline.reverse()
         for status in timeline:
             print STATUS_TEMPLATE.format(
