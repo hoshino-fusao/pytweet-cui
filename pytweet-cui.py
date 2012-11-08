@@ -18,7 +18,8 @@ class TwitterClient(Cmd):
         auth.set_access_token(self.key, self.secret)
         self.api = tweepy.API(auth)
         self.auth = auth
-        print "%s logged in" % self.api.me().screen_name
+        self.me = self.api.me()
+        print "%s logged in" % self.me.screen_name
 
     def do_EOF(self, parameters):
         print
@@ -62,6 +63,20 @@ class TwitterClient(Cmd):
             print "{full_name} {description}".format(
                 full_name = l.full_name.encode(stdout.encoding),
                 description = l.description.encode(stdout.encoding)
+            )
+
+    def do_list(self, parameters):
+        if not parameters:
+            print "list [list name]"
+            return
+
+        timeline = self.api.list_timeline(self.me.screen_name, parameters)
+        timeline.reverse()
+        for status in timeline:
+            print STATUS_TEMPLATE.format(
+                date=status.created_at,
+                name=status.user.screen_name,
+                status=status.text.encode(stdout.encoding)
             )
 
     def do_search(self, query):
