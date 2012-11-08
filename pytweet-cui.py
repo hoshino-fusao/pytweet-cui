@@ -66,6 +66,7 @@ class TwitterClient(Cmd):
             print "No tweet results for %s." % query
             return
 
+        results.reverse()
         for result in results:
             print STATUS_TEMPLATE.format(
                 date = result.created_at,
