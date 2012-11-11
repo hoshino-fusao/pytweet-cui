@@ -37,7 +37,23 @@ class TwitterClient(Cmd):
                 date=status.created_at,
                 name=status.user.screen_name,
                 status=status.text.encode(stdout.encoding)
-            )
+            ) 
+
+    def do_retweet (self, mode="by_me",count=30):
+	retweet = ""
+        if mode == "by_me":
+		retweet = self.api.retweeted_by_me(count=count)
+	elif mode == "to_me":
+		retweet = self.api.retweeted_to_me(count=count)
+	elif mode == "of_me":
+		retweet = self.api.retweets_of_me(count=count)
+
+        for status in retweet:
+            print STATUS_TEMPLATE.format(
+               date=status.created_at,
+                name=status.user.screen_name,
+                status=status.text.encode(stdout.encoding)
+            ) 
 
     def do_mentions(self, count=30):
         mentions = self.api.mentions(count=count)
