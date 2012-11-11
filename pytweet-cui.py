@@ -116,6 +116,21 @@ class TwitterClient(Cmd):
                 status = result.text.encode(stdout.encoding)
             )
 
+    def do_favorites(self, user_name):
+        user_id = None
+
+        if user_name:
+            user_id = self.api.get_user(user_name).id
+
+        favorites = self.api.favorites(user_id)
+        favorites.reverse()
+
+        for status in favorites:
+            print STATUS_TEMPLATE.format(
+                date = status.created_at,
+                name = status.user.screen_name,
+                status = status.text.encode(stdout.encoding)
+            )
 
 if __name__ == "__main__":
     client = TwitterClient()
