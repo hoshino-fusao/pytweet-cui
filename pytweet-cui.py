@@ -132,6 +132,12 @@ class TwitterClient(Cmd):
                 status = status.text.encode(stdout.encoding)
             )
 
+    def do_fav(self, id):
+        self.api.create_favorite(id)
+
+    def do_unfav(self, id):
+        self.api.destroy_favorite(id)
+
 if __name__ == "__main__":
     client = TwitterClient()
     try:
