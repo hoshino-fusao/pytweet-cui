@@ -75,11 +75,14 @@ class TwitterClient(Cmd):
 
     def do_lists(self, parameters):
         lists = self.api.lists()
-        for l in lists:
-            print "{full_name} {description}".format(
-                full_name = l.full_name.encode(stdout.encoding),
-                description = l.description.encode(stdout.encoding)
-            )
+        if lists:
+            for l in lists:
+                print "{full_name} {description}".format(
+                    full_name = l.full_name.encode(stdout.encoding),
+                    description = l.description.encode(stdout.encoding)
+                )
+        else:
+            print "You have no lists."
 
     def do_list(self, slug, count=30):
         if not slug:
