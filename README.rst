@@ -4,6 +4,9 @@
 .. image:: https://buildhive.cloudbees.com/job/ryuzi/job/pytweet-cui/badge/icon
     :target: https://buildhive.cloudbees.com/job/ryuzi/job/pytweet-cui/
 
+.. image:: https://secure.travis-ci.org/ryuzi/pytweet-cui.png?branch=develop
+    :target: https://travis-ci.org/ryuzi/pytweet-cui
+
 twitter の設定
 --------------
 
