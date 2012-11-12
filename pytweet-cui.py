@@ -8,6 +8,22 @@ import tweepy
 
 from settings import *
 
+def parseargs(args):
+    """ 入力した引数をパースし、dictで返す
+    
+    Cmd(cmd.py)の引数について:
+    Cmdでは引数をパースしてくれないため、引数を複数した使い方ができない。
+    """
+    dict_args = dict()
+    try:
+        if args:
+            dict_args = dict(tuple(arg.split('=')) for arg in args.split())
+        return dict_args
+
+    except:
+        return None
+
+
 class TwitterClient(Cmd):
     def __init__(self):
         Cmd.__init__(self)
@@ -21,38 +37,44 @@ class TwitterClient(Cmd):
         self.me = self.api.me()
         print "%s logged in" % self.me.screen_name
 
-    def do_EOF(self, parameters):
+    def emptyline(self):
+        pass
+
+    def do_EOF(self, args):
         print
         print random.choice(EXIT_MESSAGES)
         exit()
 
-    def emptyline(self):
-        pass
+    def do_timeline(self, args):
+        parsed_args = parseargs(args)
+        if parsed_args is None:
+            print "Unable parse arguments."
+            return
 
-    def do_timeline(self, count=30):
+        count = parsed_args.get('count') or parsed_args.get('c') or 30
         timeline = self.api.home_timeline(count=count)
         timeline.reverse()
         for status in timeline:
             print STATUS_TEMPLATE.format(
-                date=status.created_at,
-                name=status.user.screen_name,
-                status=status.text.encode(stdout.encoding)
+                date = status.created_at,
+                name = status.user.screen_name,
+                status = status.text.encode(self.stdout.encoding),
             ) 
 
     def do_retweet (self, mode="by_me",count=30):
-	retweet = ""
+        retweet = ""
         if mode == "by_me":
-		retweet = self.api.retweeted_by_me(count=count)
-	elif mode == "to_me":
-		retweet = self.api.retweeted_to_me(count=count)
-	elif mode == "of_me":
-		retweet = self.api.retweets_of_me(count=count)
+            retweet = self.api.retweeted_by_me(count=count)
+        elif mode == "to_me":
+            retweet = self.api.retweeted_to_me(count=count)
+        elif mode == "of_me":
+            retweet = self.api.retweets_of_me(count=count)
 
         for status in retweet:
             print STATUS_TEMPLATE.format(
-               date=status.created_at,
+                date=status.created_at,
                 name=status.user.screen_name,
-                status=status.text.encode(stdout.encoding)
+                status=status.text.encode(stdout.encoding),
             ) 
 
     def do_mentions(self, count=30):
@@ -73,7 +95,7 @@ class TwitterClient(Cmd):
             data = dict(access_token=FACEBOOK_ACCESS_TOKEN, message=status)
             urllib2.urlopen("https://graph.facebook.com/me/feed", urllib.urlencode(data))
 
-    def do_lists(self, parameters):
+    def do_lists(self, args):
         lists = self.api.lists()
         if lists:
             for l in lists:
@@ -137,6 +159,7 @@ class TwitterClient(Cmd):
 
     def do_unfav(self, id):
         self.api.destroy_favorite(id)
+
 
 if __name__ == "__main__":
     client = TwitterClient()
