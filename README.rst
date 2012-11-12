@@ -1,3 +1,5 @@
+[![Build Status](https://buildhive.cloudbees.com/job/ryuzi/job/pytweet-cui/badge/icon)](https://buildhive.cloudbees.com/job/ryuzi/job/pytweet-cui/)
+
 利用方法
 ========
 
