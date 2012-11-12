@@ -29,9 +29,7 @@ class TestParseArgs:
         eq_(parsed, None)
 
         parsed = parseargs('hoge=1 fuga')
-        print parsed
         eq_(parsed, None)
 
         parsed = parseargs(3)
-        print parsed
         eq_(parsed, None)
