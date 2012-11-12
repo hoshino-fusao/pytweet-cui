@@ -2,6 +2,7 @@
 ===================================
 
 .. image:: https://buildhive.cloudbees.com/job/ryuzi/job/pytweet-cui/badge/icon
+    :target: https://buildhive.cloudbees.com/job/ryuzi/job/pytweet-cui/
 
 twitter の設定
 --------------
