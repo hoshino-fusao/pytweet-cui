@@ -1,7 +1,7 @@
-[![Build Status](https://buildhive.cloudbees.com/job/ryuzi/job/pytweet-cui/badge/icon)](https://buildhive.cloudbees.com/job/ryuzi/job/pytweet-cui/)
+コマンドラインのTwitterクライアント
+===================================
 
-利用方法
-========
+.. image:: https://buildhive.cloudbees.com/job/ryuzi/job/pytweet-cui/badge/icon
 
 twitter の設定
 --------------
