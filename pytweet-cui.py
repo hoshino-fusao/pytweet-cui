@@ -6,7 +6,7 @@ import urllib
 import urllib2
 import tweepy
 
-from settings import *
+import settings
 
 def parseargs(args):
     """ 入力した引数をパースし、dictで返す
@@ -27,10 +27,10 @@ def parseargs(args):
 class TwitterClient(Cmd):
     def __init__(self):
         Cmd.__init__(self)
-        self.prompt = PROMPT
-        self.key = ACCESS_TOKEN
-        self.secret = ACCESS_TOKEN_SECRET
-        auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+        self.prompt = settings.PROMPT
+        self.key = settings.ACCESS_TOKEN
+        self.secret = settings.ACCESS_TOKEN_SECRET
+        auth = tweepy.OAuthHandler(settings.CONSUMER_KEY, settings.CONSUMER_SECRET)
         auth.set_access_token(self.key, self.secret)
         self.api = tweepy.API(auth)
         self.auth = auth
@@ -42,7 +42,7 @@ class TwitterClient(Cmd):
 
     def do_EOF(self, args):
         print
-        print random.choice(EXIT_MESSAGES)
+        print random.choice(settings.EXIT_MESSAGES)
         exit()
 
     def do_timeline(self, args):
@@ -55,7 +55,7 @@ class TwitterClient(Cmd):
         timeline = self.api.home_timeline(count=count)
         timeline.reverse()
         for status in timeline:
-            print STATUS_TEMPLATE.format(
+            print settings.STATUS_TEMPLATE.format(
                 date = status.created_at,
                 name = status.user.screen_name,
                 status = status.text.encode(self.stdout.encoding),
@@ -71,7 +71,7 @@ class TwitterClient(Cmd):
             retweet = self.api.retweets_of_me(count=count)
 
         for status in retweet:
-            print STATUS_TEMPLATE.format(
+            print settings.STATUS_TEMPLATE.format(
                 date=status.created_at,
                 name=status.user.screen_name,
                 status=status.text.encode(stdout.encoding),
@@ -81,7 +81,7 @@ class TwitterClient(Cmd):
         mentions = self.api.mentions(count=count)
         mentions.reverse()
         for status in mentions:
-            print STATUS_TEMPLATE.format(
+            print settings.STATUS_TEMPLATE.format(
                 date=status.created_at,
                 name=status.user.screen_name,
                 status=status.text.encode(stdout.encoding)
@@ -91,8 +91,8 @@ class TwitterClient(Cmd):
         status = message.decode(stdin.encoding).encode(stdout.encoding)
         self.api.update_status(status)
         
-        if FACEBOOK_ACCESS_TOKEN:
-            data = dict(access_token=FACEBOOK_ACCESS_TOKEN, message=status)
+        if settings.FACEBOOK_ACCESS_TOKEN:
+            data = dict(access_token=settings.FACEBOOK_ACCESS_TOKEN, message=status)
             urllib2.urlopen("https://graph.facebook.com/me/feed", urllib.urlencode(data))
 
     def do_lists(self, args):
@@ -114,7 +114,7 @@ class TwitterClient(Cmd):
         timeline = self.api.list_timeline(owner=self.me.screen_name, slug=slug, count=count)
         timeline.reverse()
         for status in timeline:
-            print STATUS_TEMPLATE.format(
+            print settings.STATUS_TEMPLATE.format(
                 date=status.created_at,
                 name=status.user.screen_name,
                 status=status.text.encode(stdout.encoding)
@@ -132,7 +132,7 @@ class TwitterClient(Cmd):
 
         results.reverse()
         for result in results:
-            print STATUS_TEMPLATE.format(
+            print settings.STATUS_TEMPLATE.format(
                 date = result.created_at,
                 name = result.from_user,
                 status = result.text.encode(stdout.encoding)
@@ -148,7 +148,7 @@ class TwitterClient(Cmd):
         favorites.reverse()
 
         for status in favorites:
-            print STATUS_TEMPLATE.format(
+            print settings.STATUS_TEMPLATE.format(
                 date = status.created_at,
                 name = status.user.screen_name,
                 status = status.text.encode(stdout.encoding)
