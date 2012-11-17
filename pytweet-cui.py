@@ -5,6 +5,7 @@ from cmd import Cmd
 import urllib
 import urllib2
 import tweepy
+from tweepy.error import TweepError
 
 import settings
 from lib import parseargs
@@ -96,14 +97,17 @@ class TwitterClient(Cmd):
             print "list [list name]"
             return
 
-        timeline = self.api.list_timeline(owner=self.me.screen_name, slug=slug, count=count)
-        timeline.reverse()
-        for status in timeline:
-            print settings.STATUS_TEMPLATE.format(
-                date=status.created_at,
-                name=status.user.screen_name,
-                status=status.text.encode(stdout.encoding)
-            )
+        try:
+            timeline = self.api.list_timeline(owner=self.me.screen_name, slug=slug, count=count)
+            timeline.reverse()
+            for status in timeline:
+                print settings.STATUS_TEMPLATE.format(
+                    date=status.created_at,
+                    name=status.user.screen_name,
+                    status=status.text.encode(stdout.encoding)
+                )
+        except TweepError, e:
+            print e
 
     def do_search(self, query):
         if not query:
