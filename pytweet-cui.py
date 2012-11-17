@@ -106,8 +106,11 @@ class TwitterClient(Cmd):
                     name=status.user.screen_name,
                     status=status.text.encode(stdout.encoding)
                 )
-        except TweepError, e:
-            print e
+        except TweepError as e:
+            if e.response.status == 404:
+                print "List does not exist."
+            else:
+                print e.reason
 
     def do_search(self, query):
         if not query:
