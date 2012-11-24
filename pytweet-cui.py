@@ -21,6 +21,7 @@ class TwitterClient(Cmd):
         self.api = tweepy.API(auth)
         self.auth = auth
         self.me = self.api.me()
+        self.tmp_ids = []
         print "%s logged in" % self.me.screen_name
 
     def emptyline(self):
@@ -40,13 +41,16 @@ class TwitterClient(Cmd):
         count = parsed_args.get('count') or parsed_args.get('c') or 30
         timeline = self.api.home_timeline(count=count)
         timeline.reverse()
+        self.tmp_ids = []
         for i, status in enumerate(timeline):
             print settings.STATUS_TEMPLATE.format(
                 index = i,
                 date = status.created_at,
                 name = status.user.screen_name,
                 status = status.text.encode(self.stdout.encoding),
-            ) 
+            )
+
+            self.tmp_ids.append(status.id)
 
     def do_retweet (self, mode="by_me",count=30):
         retweet = ""
@@ -57,6 +61,7 @@ class TwitterClient(Cmd):
         elif mode == "of_me":
             retweet = self.api.retweets_of_me(count=count)
 
+        self.tmp_ids = []
         for i, status in enumerate(retweet):
             print settings.STATUS_TEMPLATE.format(
                 index = i,
@@ -65,9 +70,12 @@ class TwitterClient(Cmd):
                 status=status.text.encode(stdout.encoding),
             ) 
 
+            self.tmp_ids.append(status.id)
+
     def do_mentions(self, count=30):
         mentions = self.api.mentions(count=count)
         mentions.reverse()
+        self.tmp_ids = []
         for i, status in enumerate(mentions):
             print settings.STATUS_TEMPLATE.format(
                 index = i,
@@ -75,6 +83,8 @@ class TwitterClient(Cmd):
                 name=status.user.screen_name,
                 status=status.text.encode(stdout.encoding)
             )
+            
+            self.tmp_ids.append(status.id)
 
     def do_tweet(self, message):
         status = message.decode(stdin.encoding).encode(stdout.encoding)
@@ -103,6 +113,7 @@ class TwitterClient(Cmd):
         try:
             timeline = self.api.list_timeline(owner=self.me.screen_name, slug=slug, count=count)
             timeline.reverse()
+            self.tmp_ids = []
             for i, status in enumerate(timeline):
                 print settings.STATUS_TEMPLATE.format(
                     index = i,
@@ -110,6 +121,7 @@ class TwitterClient(Cmd):
                     name=status.user.screen_name,
                     status=status.text.encode(stdout.encoding)
                 )
+                self.tmp_ids.append(status.id)
         except TweepError as e:
             if e.response.status == 404:
                 print "List does not exist."
@@ -127,6 +139,7 @@ class TwitterClient(Cmd):
             return
 
         results.reverse()
+        self.tmp_ids = []
         for i, result in enumerate(results):
             print settings.STATUS_TEMPLATE.format(
                 index = i,
@@ -134,6 +147,8 @@ class TwitterClient(Cmd):
                 name = result.from_user,
                 status = result.text.encode(stdout.encoding)
             )
+
+            self.tmp_ids.append(result.id)
 
     def do_favorites(self, user_name):
         user_id = None
@@ -144,6 +159,7 @@ class TwitterClient(Cmd):
         favorites = self.api.favorites(user_id)
         favorites.reverse()
 
+        self.tmp_ids = []
         for i, status in enumerate(favorites):
             print settings.STATUS_TEMPLATE.format(
                 index = i,
@@ -152,11 +168,13 @@ class TwitterClient(Cmd):
                 status = status.text.encode(stdout.encoding)
             )
 
-    def do_fav(self, id):
-        self.api.create_favorite(id)
+            self.tmp_ids.append(status.id)
 
-    def do_unfav(self, id):
-        self.api.destroy_favorite(id)
+    def do_fav(self, index):
+        self.api.create_favorite(self.tmp_ids[int(index)])
+
+    def do_unfav(self, index):
+        self.api.destroy_favorite(self.tmp_ids[int(index)])
 
 
 if __name__ == "__main__":
