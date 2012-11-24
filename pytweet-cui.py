@@ -40,8 +40,9 @@ class TwitterClient(Cmd):
         count = parsed_args.get('count') or parsed_args.get('c') or 30
         timeline = self.api.home_timeline(count=count)
         timeline.reverse()
-        for status in timeline:
+        for i, status in enumerate(timeline):
             print settings.STATUS_TEMPLATE.format(
+                index = i,
                 date = status.created_at,
                 name = status.user.screen_name,
                 status = status.text.encode(self.stdout.encoding),
@@ -56,8 +57,9 @@ class TwitterClient(Cmd):
         elif mode == "of_me":
             retweet = self.api.retweets_of_me(count=count)
 
-        for status in retweet:
+        for i, status in enumerate(retweet):
             print settings.STATUS_TEMPLATE.format(
+                index = i,
                 date=status.created_at,
                 name=status.user.screen_name,
                 status=status.text.encode(stdout.encoding),
@@ -66,8 +68,9 @@ class TwitterClient(Cmd):
     def do_mentions(self, count=30):
         mentions = self.api.mentions(count=count)
         mentions.reverse()
-        for status in mentions:
+        for i, status in enumerate(mentions):
             print settings.STATUS_TEMPLATE.format(
+                index = i,
                 date=status.created_at,
                 name=status.user.screen_name,
                 status=status.text.encode(stdout.encoding)
@@ -100,8 +103,9 @@ class TwitterClient(Cmd):
         try:
             timeline = self.api.list_timeline(owner=self.me.screen_name, slug=slug, count=count)
             timeline.reverse()
-            for status in timeline:
+            for i, status in enumerate(timeline):
                 print settings.STATUS_TEMPLATE.format(
+                    index = i,
                     date=status.created_at,
                     name=status.user.screen_name,
                     status=status.text.encode(stdout.encoding)
@@ -123,8 +127,9 @@ class TwitterClient(Cmd):
             return
 
         results.reverse()
-        for result in results:
+        for i, result in enumerate(results):
             print settings.STATUS_TEMPLATE.format(
+                index = i,
                 date = result.created_at,
                 name = result.from_user,
                 status = result.text.encode(stdout.encoding)
@@ -139,8 +144,9 @@ class TwitterClient(Cmd):
         favorites = self.api.favorites(user_id)
         favorites.reverse()
 
-        for status in favorites:
+        for i, status in enumerate(favorites):
             print settings.STATUS_TEMPLATE.format(
+                index = i,
                 date = status.created_at,
                 name = status.user.screen_name,
                 status = status.text.encode(stdout.encoding)
