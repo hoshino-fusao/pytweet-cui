@@ -43,13 +43,7 @@ class TwitterClient(Cmd):
         timeline.reverse()
         self.tmp_ids = []
         for i, status in enumerate(timeline):
-            print settings.STATUS_TEMPLATE.format(
-                index = i,
-                date = status.created_at,
-                name = status.user.screen_name,
-                status = status.text.encode(self.stdout.encoding),
-            )
-
+            self.status_template(i, status)
             self.tmp_ids.append(status.id)
 
     def do_retweet (self, mode="by_me",count=30):
@@ -63,13 +57,7 @@ class TwitterClient(Cmd):
 
         self.tmp_ids = []
         for i, status in enumerate(retweet):
-            print settings.STATUS_TEMPLATE.format(
-                index = i,
-                date=status.created_at,
-                name=status.user.screen_name,
-                status=status.text.encode(stdout.encoding),
-            ) 
-
+            self.status_template(i, status)
             self.tmp_ids.append(status.id)
 
     def do_mentions(self, count=30):
@@ -77,13 +65,7 @@ class TwitterClient(Cmd):
         mentions.reverse()
         self.tmp_ids = []
         for i, status in enumerate(mentions):
-            print settings.STATUS_TEMPLATE.format(
-                index = i,
-                date=status.created_at,
-                name=status.user.screen_name,
-                status=status.text.encode(stdout.encoding)
-            )
-            
+            self.status_template(i, status)
             self.tmp_ids.append(status.id)
 
     def do_tweet(self, message):
@@ -115,12 +97,7 @@ class TwitterClient(Cmd):
             timeline.reverse()
             self.tmp_ids = []
             for i, status in enumerate(timeline):
-                print settings.STATUS_TEMPLATE.format(
-                    index = i,
-                    date=status.created_at,
-                    name=status.user.screen_name,
-                    status=status.text.encode(stdout.encoding)
-                )
+                self.status_template(i, status)
                 self.tmp_ids.append(status.id)
         except TweepError as e:
             if e.response.status == 404:
@@ -161,13 +138,7 @@ class TwitterClient(Cmd):
 
         self.tmp_ids = []
         for i, status in enumerate(favorites):
-            print settings.STATUS_TEMPLATE.format(
-                index = i,
-                date = status.created_at,
-                name = status.user.screen_name,
-                status = status.text.encode(stdout.encoding)
-            )
-
+            self.status_template(i, status)
             self.tmp_ids.append(status.id)
 
     def do_fav(self, index):
@@ -176,6 +147,13 @@ class TwitterClient(Cmd):
     def do_unfav(self, index):
         self.api.destroy_favorite(self.tmp_ids[int(index)])
 
+    def status_template(self, index, status):
+        print settings.STATUS_TEMPLATE.format(
+            index = index,
+            date = status.created_at,
+            name = status.user.screen_name,
+            status = status.text.encode(stdout.encoding),
+        )
 
 if __name__ == "__main__":
     client = TwitterClient()
