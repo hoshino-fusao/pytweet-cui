@@ -142,10 +142,24 @@ class TwitterClient(Cmd):
             self.tmp_ids.append(status.id)
 
     def do_fav(self, index):
-        self.api.create_favorite(self.tmp_ids[int(index)])
+        if not index:
+            print "Usage: fav index"
+            return
+        try:
+            self.api.create_favorite(self.tmp_ids[int(index)])
+        except IndexError:
+            print "Index does not exist."
+        except TweepError as e:
+            print e.reason
 
     def do_unfav(self, index):
-        self.api.destroy_favorite(self.tmp_ids[int(index)])
+        if not index:
+            print "Usage: unfav index"
+            return
+        try:
+            self.api.destroy_favorite(self.tmp_ids[int(index)])
+        except IndexError:
+            print "Index does not exist."
 
     def status_template(self, index, status):
         print settings.STATUS_TEMPLATE.format(
