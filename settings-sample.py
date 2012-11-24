@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 PROMPT = "Twitter> "
-STATUS_TEMPLATE = "{date} [{name}] {status}"
+STATUS_TEMPLATE = "[{index}] {date} [{name}] {status}"
 EXIT_MESSAGES = ["Good bye.", "See you.", "Good luck!"] 
 
 # twitter settings
