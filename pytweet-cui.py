@@ -5,6 +5,7 @@ from cmd import Cmd
 import urllib
 import urllib2
 import tweepy
+from dateutil.relativedelta import relativedelta
 from tweepy.error import TweepError
 
 import settings
@@ -162,9 +163,10 @@ class TwitterClient(Cmd):
             print "Index does not exist."
 
     def status_template(self, index, status):
+        date_jst = status.created_at + relativedelta(hours=+9)
         print settings.STATUS_TEMPLATE.format(
             index = index,
-            date = status.created_at,
+            date = date_jst,
             name = status.user.screen_name,
             status = status.text.encode(stdout.encoding),
         )
