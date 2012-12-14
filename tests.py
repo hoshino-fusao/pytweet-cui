@@ -22,14 +22,28 @@ class TestParseArgs:
 
     def test_illigal(self):
         """ illigal value """
-        parsed = parseargs('hoge')
-        eq_(parsed, None)
+        test_key = 'test_key'
 
-        parsed = parseargs('hoge fuga')
-        eq_(parsed, None)
+        test_value = 'hoge'
+        parsed = parseargs(test_value)
+        eq_(parsed, {})
+        parsed = parseargs(test_value, default_key=test_key)
+        eq_(parsed.get(test_key), test_value)
 
-        parsed = parseargs('hoge=1 fuga')
-        eq_(parsed, None)
+        test_value = 'hoge fuga'
+        parsed = parseargs(test_value)
+        eq_(parsed, {})
+        parsed = parseargs(test_value, default_key=test_key)
+        eq_(parsed.get(test_key), test_value)
 
-        parsed = parseargs(3)
-        eq_(parsed, None)
+        test_value = 'hoge=1 fuga'
+        parsed = parseargs(test_value)
+        eq_(parsed, {})
+        parsed = parseargs(test_value, default_key=test_key)
+        eq_(parsed.get(test_key), test_value)
+
+        test_value = 23
+        parsed = parseargs(test_value)
+        eq_(parsed, {})
+        parsed = parseargs(test_value, default_key=test_key)
+        eq_(parsed.get(test_key), test_value)
