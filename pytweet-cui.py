@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
+from cmd import Cmd
+from dateutil.relativedelta import relativedelta
 from sys import stdin, stdout, exit
 import random
-from cmd import Cmd
 import urllib
 import urllib2
+import textwrap
+
 import tweepy
-from dateutil.relativedelta import relativedelta
 from tweepy.error import TweepError
 
 import settings
 from lib import parseargs
+from decorators import print_exception_message
 
 class TwitterClient(Cmd):
     def __init__(self):
@@ -24,6 +27,7 @@ class TwitterClient(Cmd):
         self.me = self.api.me()
         self.tmp_ids = []
         print "%s logged in" % self.me.screen_name
+        print
 
     def emptyline(self):
         pass
@@ -33,13 +37,11 @@ class TwitterClient(Cmd):
         print random.choice(settings.EXIT_MESSAGES)
         exit()
 
+    @print_exception_message(TweepError)
     def do_timeline(self, args):
-        parsed_args = parseargs(args)
-        if parsed_args is None:
-            print "Unable parse arguments."
-            return
+        parsed_args = parseargs(args, default_key='count')
+        count = parsed_args.get('count') or 30
 
-        count = parsed_args.get('count') or parsed_args.get('c') or 30
         timeline = self.api.home_timeline(count=count)
         timeline.reverse()
         self.tmp_ids = []
@@ -61,7 +63,11 @@ class TwitterClient(Cmd):
             self.status_template(i, status)
             self.tmp_ids.append(status.id)
 
-    def do_mentions(self, count=30):
+    @print_exception_message(TweepError)
+    def do_mentions(self, args):
+        parsed_args = parseargs(args, default_key='count')
+        count = parsed_args.get('count') or 30
+
         mentions = self.api.mentions(count=count)
         mentions.reverse()
         self.tmp_ids = []
@@ -69,14 +75,17 @@ class TwitterClient(Cmd):
             self.status_template(i, status)
             self.tmp_ids.append(status.id)
 
-    def do_tweet(self, message):
-        status = message.decode(stdin.encoding).encode(stdout.encoding)
+    @print_exception_message(TweepError)
+    def do_tweet(self, args):
+        parsed_args = parseargs(args, default_key='message')
+        status = parsed_args.get('message').decode(stdin.encoding).encode(stdout.encoding)
         self.api.update_status(status)
         
         if settings.FACEBOOK_ACCESS_TOKEN:
             data = dict(access_token=settings.FACEBOOK_ACCESS_TOKEN, message=status)
             urllib2.urlopen("https://graph.facebook.com/me/feed", urllib.urlencode(data))
 
+    @print_exception_message(TweepError)
     def do_lists(self, args):
         lists = self.api.lists()
         if lists:
@@ -88,27 +97,44 @@ class TwitterClient(Cmd):
         else:
             print "You have no lists."
 
-    def do_list(self, slug, count=30):
-        if not slug:
-            print "list [list name]"
+
+    def help_list(self):
+        print textwrap.dedent("""\
+                usage:
+                list <slug>|slug=<slug> [count=<limit the number of statuses output>]
+
+                Try 'lists' to get more slug.
+                """)
+
+    @print_exception_message(TweepError)
+    def do_list(self, args):
+        parsed_args = parseargs(args, default_key='slug')
+        count = parsed_args.get('count') or 30
+        slug = parsed_args.get('slug') or None
+
+        if slug is None:
+            self.onecmd('help list')
             return
 
-        try:
-            timeline = self.api.list_timeline(owner=self.me.screen_name, slug=slug, count=count)
-            timeline.reverse()
-            self.tmp_ids = []
-            for i, status in enumerate(timeline):
-                self.status_template(i, status)
-                self.tmp_ids.append(status.id)
-        except TweepError as e:
-            if e.response.status == 404:
-                print "List does not exist."
-            else:
-                print e.reason
+        timeline = self.api.list_timeline(owner=self.me.screen_name, slug=slug, count=count)
+        timeline.reverse()
+        self.tmp_ids = []
+        for i, status in enumerate(timeline):
+            self.status_template(i, status)
+            self.tmp_ids.append(status.id)
 
-    def do_search(self, query):
-        if not query:
-            print "search [query string]"
+    def help_search(self):
+        print textwrap.dedent("""\
+                usage:
+                search <query string>
+                """)
+
+    @print_exception_message(TweepError)
+    def do_search(self, args):
+        parsed_args = parseargs(args, default_key='query')
+        query = parsed_args.get('query') or None
+        if query is None:
+            self.onecmd('help search')
             return
 
         results = self.api.search(query)
@@ -128,11 +154,21 @@ class TwitterClient(Cmd):
 
             self.tmp_ids.append(result.id)
 
-    def do_favorites(self, user_name):
-        user_id = None
+    
+    def help_favorites(self):
+        print textwrap.dedent("""\
+                usage:
+                favorites [<user name>]
+                """)
 
-        if user_name:
-            user_id = self.api.get_user(user_name).id
+    @print_exception_message(TweepError)
+    def do_favorites(self, args):
+        parsed_args = parseargs(args, default_key='user')
+        user = parsed_args.get('user')
+
+        user_id = None
+        if user:
+            user_id = self.api.get_user(user).id
 
         favorites = self.api.favorites(user_id)
         favorites.reverse()
@@ -142,39 +178,59 @@ class TwitterClient(Cmd):
             self.status_template(i, status)
             self.tmp_ids.append(status.id)
 
-    def do_fav(self, index):
-        if not index:
-            print "Usage: fav index"
-            return
-        try:
-            self.api.create_favorite(self.tmp_ids[int(index)])
-        except IndexError:
-            print "Index does not exist."
-        except TweepError as e:
-            print e.reason
 
-    def do_unfav(self, index):
+    def help_fav(self):
+        print textwrap.dedent("""\
+                usage:
+                fav <index number>
+
+                Try 'timeline' or 'search <query string>' to get index number of status.
+                """)
+
+    @print_exception_message(TweepError, IndexError)
+    def do_fav(self, args):
+        parsed_args = parseargs(args, default_key='index')
+        index = parsed_args.get('index')
         if not index:
-            print "Usage: unfav index"
+            self.onecmd('help fav')
             return
-        try:
-            self.api.destroy_favorite(self.tmp_ids[int(index)])
-        except IndexError:
-            print "Index does not exist."
+
+        self.api.create_favorite(self.tmp_ids[int(index)])
+
+
+    def help_unfav(self):
+        print textwrap.dedent("""\
+                usage:
+                unfav <index number>
+
+                Try 'favorites' to get index number of status.
+                """)
+
+    @print_exception_message(TweepError, IndexError)
+    def do_unfav(self, args):
+        parsed_args = parseargs(args, default_key='index')
+        index = parsed_args.get('index')
+        if not index:
+            self.onecmd('help unfav')
+            return
+
+        self.api.destroy_favorite(self.tmp_ids[int(index)])
+
 
     def status_template(self, index, status):
-        date_jst = status.created_at + relativedelta(hours=+9)
         print settings.STATUS_TEMPLATE.format(
             index = index,
-            date = date_jst,
+            date = status.created_at + relativedelta(hours=+9),
             name = status.user.screen_name,
             status = status.text.encode(stdout.encoding),
         )
+
 
 if __name__ == "__main__":
     client = TwitterClient()
     try:
         client.cmdloop()
+
     except KeyboardInterrupt:
         client.onecmd("EOF")
 
