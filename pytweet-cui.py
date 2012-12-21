@@ -37,6 +37,9 @@ class TwitterClient(Cmd):
         print random.choice(settings.EXIT_MESSAGES)
         exit()
 
+    def do_dice(self, args):
+        print random.randint(1, 6)
+
     @print_exception_message(TweepError)
     def do_timeline(self, args):
         parsed_args = parseargs(args, default_key='count')
